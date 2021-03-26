@@ -18,7 +18,7 @@ class Miner:
 
     def apriori(self,sup,conf):
         freqPatterns = {} #both are gonna be arrays of itemsets basically.
-        interestingRules = {}
+        interestingRules =  []
         candidateSets = {}
         setSize = 1
 
@@ -69,17 +69,28 @@ class Miner:
 
 
         #Now that we have patterns, let's figure some rules.
-        each itemset in freqPatterns:
+        #So, sets that don't have a superset in freqPatterns are candidates for getting a whole bunch of cool thing.
+        #
+        for itemset in freqPatterns:
+            for otherset in freqPatterns:
+                if itemset.isdisjoint(otherset):
+                    confidence = freqPatterns[itemset.union(otherset)]/freqPatterns[otherset]
+                    if confidence >= sup:
+                        interestingRules.append(Rule(itemset,otherset,confidence,freqPatterns[frozenset(itemset.union(otherset))]))
+
             #time to find some interesting rules.
 
         return freqPatterns
 
-
-class Itemset:
-    def __init__(self,items):
-        self.items = frozenset(items)
-        self.count = 0
-
 class Rule:
-    def __init__(self):
-        self.rule = "wow"
+    def __init__(self,ant,con,conf,freq):
+        self.ant = ant
+        self.con = con
+        self.conf = conf
+        self.freq = freq
+
+    def __srt__(self):
+        return str(self.ant)+"=>"+str(self.con)+" : "+str(self.conf)+", "+str(self.freq)+" occurences"
+
+    def __eq__(self, other):
+        return self.ant is other.ant and self.con is other.con
